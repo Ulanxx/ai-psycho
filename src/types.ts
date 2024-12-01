@@ -19,6 +19,7 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
+  requestId: string;
   files: MessageFile[];
 }
 

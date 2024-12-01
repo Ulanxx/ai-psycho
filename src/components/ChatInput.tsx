@@ -1,4 +1,4 @@
-import React, { useState, KeyboardEvent, useEffect } from 'react';
+import React, { useState, KeyboardEvent, useEffect, useRef } from 'react';
 import { Send, Paperclip } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { FileUpload, UploadedFile } from './FileUpload';
@@ -27,6 +27,7 @@ const THERAPIST_TRIGGERS = [
 interface ChatInputProps {
   onSendMessage: (message: ChatMessage) => void;
   onBeforeUpload: () => void;
+  onUploadComplete: () => void;
   disabled?: boolean;
 }
 enum FileType {
@@ -40,18 +41,27 @@ interface UploadFile {
   fileType: FileType
 }
 
-export function ChatInput({ onSendMessage, onBeforeUpload, disabled, }: ChatInputProps) {
+export function ChatInput({ onSendMessage, onBeforeUpload, onUploadComplete, disabled }: ChatInputProps) {
   const { t } = useTranslation();
   const { isDark } = useThemeStore();
   const [input, setInput] = useState('');
   const [showUpload, setShowUpload] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadFile[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (showUpload) {
       onBeforeUpload();
     }
   }, [showUpload]);
+
+  // 当上传完成时自动聚焦输入框
+  useEffect(() => {
+    if (!isUploading) {
+      inputRef.current?.focus();
+    }
+  }, [isUploading]);
 
   const checkForTriggerWords = (text: string) => {
     const lowercaseText = text.toLowerCase();
@@ -84,17 +94,23 @@ export function ChatInput({ onSendMessage, onBeforeUpload, disabled, }: ChatInpu
     }
   };
 
-
   const handleUpload = async (files: UploadedFile[]) => {
     try {
+      setIsUploading(true);
       const uploadPromises = files.map(file => uploadFile(file.file));
       const results = await Promise.all(uploadPromises);
 
-      // 假设上传接口返回文件URL
-      const fileUrls = results.map(result => ({ fileUrl: result.fileUrl, fileType: result.fileType }));
+      const fileUrls = results.map(result => ({
+        fileUrl: result.fileUrl,
+        fileType: result.fileType
+      }));
+
       setUploadedFiles(prev => [...prev, ...fileUrls]);
+      onUploadComplete();
     } catch (error) {
       console.error('文件上传失败:', error);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -102,7 +118,15 @@ export function ChatInput({ onSendMessage, onBeforeUpload, disabled, }: ChatInpu
     <div className={`border-t ${isDark ? 'border-white/10 bg-dark-800/50' : 'border-gray-200 bg-white'} backdrop-blur-lg`}>
       {showUpload && (
         <div className={`p-4 border-b ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
-          <FileUpload onUpload={handleUpload} />
+          <FileUpload onUpload={handleUpload} accept="image/*,audio/*,video/*" multiple={false} />
+          {isUploading && (
+            <div className={`mt-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+                {t('chat.uploading')}
+              </div>
+            </div>
+          )}
         </div>
       )}
       <div className="p-3 sm:p-4">
@@ -113,25 +137,27 @@ export function ChatInput({ onSendMessage, onBeforeUpload, disabled, }: ChatInpu
               ? 'text-gray-400 hover:bg-white/10 active:bg-white/5'
               : 'text-gray-500 hover:bg-gray-100 active:bg-gray-200'
               }`}
+            disabled={isUploading}
             aria-label={t('common.upload')}
           >
             <Paperclip className="w-5 h-5" />
           </button>
           <textarea
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={t('common.inputPlaceholder')}
-            disabled={disabled}
+            placeholder={isUploading ? t('chat.waitingUpload') : t('common.inputPlaceholder')}
+            disabled={disabled || isUploading}
             className={`flex-grow p-2.5 text-base rounded-xl min-h-[44px] max-h-[200px] resize-none transition-colors ${isDark
               ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/25'
               : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
-              } border`}
+              } border disabled:opacity-50 disabled:cursor-not-allowed`}
             rows={1}
           />
           <button
             onClick={handleSubmit}
-            disabled={disabled || !input.trim()}
+            disabled={disabled || !input.trim() || isUploading}
             className="p-2.5 rounded-xl tech-gradient text-white hover:opacity-90 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg disabled:shadow-none"
             aria-label={t('common.send')}
           >

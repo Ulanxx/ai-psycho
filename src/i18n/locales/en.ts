@@ -60,5 +60,10 @@ export default {
       reviews: "Reviews",
       schedule: "Schedule"
     }
+  },
+  chat: {
+    waitForCurrentMessage: 'Please wait for the current message to be sent',
+    waitForFileUpload: 'Please wait for the file to be uploaded',
+    waitingUpload: 'Waiting for file upload...'
   }
 };

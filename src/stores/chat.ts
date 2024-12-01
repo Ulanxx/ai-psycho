@@ -13,9 +13,7 @@ interface ChatStore {
   setCurrentChat: (id: string) => void;
   addMessage: (chatId: string, message: Message, replace?: boolean) => void;
   getCurrentChat: () => Chat | null;
-  getLastUserMessage: (chatId: string) => string;
-  lastMessageId: string | null;
-  setLastMessageId: (id: string) => void;
+  getLastAssistantMessage: () => Message | null;
   setShowTherapists: (show: boolean) => void;
   selectedTherapistIds: string[];
   setSelectedTherapistIds: (ids: string[]) => void;
@@ -24,21 +22,21 @@ interface ChatStore {
 export const useChatStore = create<ChatStore>()(
   persist(
     (set, get) => ({
-      chats: [],
-      currentChatId: null,
-      lastMessageId: null,
+      chats: [] as Chat[],
+      currentChatId: null as string | null,
       showTherapists: false,
-      selectedTherapistIds: [],
+      selectedTherapistIds: [] as string[],
 
       createChat: () => {
-        set({ currentChatId: null, lastMessageId: null });
+        const id = uuidv4()
         const newChat: Chat = {
           id: uuidv4(),
           title: 'New Chat',
           messages: [{
-            id: uuidv4(),
+            id: id,
             role: 'assistant',
             content: t('welcome.message'),
+            requestId: id,
             timestamp: new Date().toISOString(),
             files: [],
           }],
@@ -110,20 +108,11 @@ export const useChatStore = create<ChatStore>()(
         return chats.find(chat => chat.id === currentChatId) ?? null;
       },
 
-      getLastUserMessage: (chatId: string) => {
+      getLastAssistantMessage: () => {
+        // 获取聊天列表中最后一个assistant消息
         const { chats } = get();
-        const chat = chats.find(c => c.id === chatId);
-        if (!chat) return '';
-
-        for (let i = chat.messages.length - 1; i >= 0; i--) {
-          if (chat.messages[i].role === 'user') {
-            return chat.messages[i].content;
-          }
-        }
-        return '';
+        return chats.flatMap(chat => chat.messages.filter(m => m.role === 'assistant')).pop() ?? null;
       },
-
-      setLastMessageId: (id) => set({ lastMessageId: id }),
 
       setShowTherapists: (show: boolean) => set({ showTherapists: show }),
 

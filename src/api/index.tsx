@@ -47,7 +47,13 @@ export interface ChatMessage {
 }
 
 let lastRequestId = '';
-export const streamChatMessage = async (message: ChatMessage, requestId: string, onData: (text: string) => void) => {
+export const streamChatMessage = async (message: ChatMessage, requestId: string, onData: ({
+    text,
+    requestId
+}: {
+    text: string;
+    requestId: string;
+}) => void) => {
     let accumulatedText = '';
 
     try {
@@ -60,7 +66,7 @@ export const streamChatMessage = async (message: ChatMessage, requestId: string,
             body: JSON.stringify({
                 fileList: message.files || [],
                 msg: message.content,
-                requestId: requestId.split('___')[0] || Date.now().toString()
+                requestId
             }),
             onmessage(event) {
                 try {
@@ -81,8 +87,10 @@ export const streamChatMessage = async (message: ChatMessage, requestId: string,
                         } else {
                             accumulatedText = accumulatedText + processedText;
                         }
-                        lastRequestId = event.id;
-                        onData(accumulatedText);
+                        onData({
+                            text: accumulatedText,
+                            requestId: event.event,
+                        });
 
                     }
                 } catch (e) {
@@ -98,8 +106,10 @@ export const streamChatMessage = async (message: ChatMessage, requestId: string,
                         .replace(/\s+/g, ' ')  // 规范化多余空格
                         .trim();
 
-                    useChatStore.getState().setLastMessageId(lastRequestId + '___' + Date.now().toString());
-                    onData(finalText);
+                    onData({
+                        text: finalText,
+                        requestId: lastRequestId
+                    });
                 }
             },
             onerror(err) {

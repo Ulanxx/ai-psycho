@@ -12,7 +12,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { useChatStore } from './stores/chat';
 import type { Message } from './types';
 import { streamChatMessage, type ChatMessage } from './api';
-
+import { v4 as uuidv4 } from 'uuid';
 const TherapistModal = () => {
   const { showTherapists } = useChatStore();
 
@@ -39,17 +39,20 @@ const TherapistModal = () => {
 };
 
 function Chat() {
-  const { t } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const {
     createChat,
     getCurrentChat,
     addMessage,
-    lastMessageId,
     showTherapists,  // 从 store 中获取状态
-    setShowTherapists  // 从 store 中获取方法
+    setShowTherapists,  // 从 store 中获取方法
+    getLastAssistantMessage,
   } = useChatStore();
+
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const currentChat = getCurrentChat();
@@ -63,7 +66,9 @@ function Chat() {
   }, [showTherapists]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 50);
   };
 
   useEffect(() => {
@@ -71,6 +76,16 @@ function Chat() {
   }, [getCurrentChat()?.messages]);
 
   const handleSendMessage = async (message: ChatMessage) => {
+    if (isStreaming) {
+      alert(t('chat.waitForCurrentMessage'));
+      return;
+    }
+
+    if (isUploading) {
+      alert(t('chat.waitForFileUpload'));
+      return;
+    }
+
     const currentChat = getCurrentChat();
     if (!currentChat) return;
 
@@ -79,6 +94,7 @@ function Chat() {
       role: 'user',
       content: message.content,
       timestamp: new Date().toISOString(),
+      requestId: uuidv4(),
       files: message.files?.map(file => ({
         url: file.fileUrl,
         type: file.fileType
@@ -87,37 +103,55 @@ function Chat() {
 
     addMessage(currentChat.id, userMessage);
 
-    const requestId = lastMessageId || Date.now().toString();
+    const lastAssistantMessage = getLastAssistantMessage();
+    const id = uuidv4()
     try {
-      await streamChatMessage(message, requestId, (text: string) => {
+      setIsStreaming(true);
+      await streamChatMessage(message, lastAssistantMessage?.requestId || uuidv4(), ({
+        text,
+        requestId
+      }) => {
         const updatedMessage: Message = {
-          id: requestId,
+          id: id,
           role: 'assistant',
           content: text,
           timestamp: new Date().toISOString(),
+          requestId: requestId,
           files: [],
         };
 
         addMessage(currentChat.id, updatedMessage, true);
-        setTimeout(scrollToBottom, 0);
+        scrollToBottom();
       });
 
       if (message.shouldShowTherapists) {
         setShowTherapists(true);  // 使用 store 的方法
-        setTimeout(scrollToBottom, 0);
       }
 
     } catch (error) {
       console.error('处理消息失败:', error);
       const errorMessage: Message = {
-        id: (Date.now() + 2).toString(),
+        id: id,
         role: 'assistant',
         content: t('common.error'),
         timestamp: new Date().toISOString(),
+        requestId: uuidv4(),
         files: [],
       };
       addMessage(currentChat.id, errorMessage);
+    } finally {
+      setIsStreaming(false);
+      scrollToBottom();
     }
+  };
+
+  const handleBeforeUpload = () => {
+    setIsUploading(true);
+    scrollToBottom();
+  };
+
+  const handleUploadComplete = () => {
+    setIsUploading(false);
   };
 
   const currentChat = getCurrentChat();
@@ -143,7 +177,12 @@ function Chat() {
           </div>
         </div>
 
-        <ChatInput onSendMessage={handleSendMessage} onBeforeUpload={scrollToBottom} />
+        <ChatInput
+          onSendMessage={handleSendMessage}
+          onBeforeUpload={handleBeforeUpload}
+          onUploadComplete={handleUploadComplete}
+          disabled={isStreaming || isUploading}
+        />
       </div>
     </div>
   );

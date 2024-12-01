@@ -59,5 +59,11 @@ export default {
       reviews: "患者评价",
       schedule: "预约时间"
     }
+  },
+  chat: {
+    waitForCurrentMessage: '请等待当前消息发送完成',
+    waitForFileUpload: '请等待文件上传完成',
+    uploading: '正在上传文件...',
+    waitingUpload: '请等待文件上传完成后继续...'
   }
 };
