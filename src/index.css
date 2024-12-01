@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  
+  body {
+    @apply text-gray-900 antialiased bg-[#0A0F1E];
+  }
+
+  /* Better mobile touch targets */
+  button, a {
+    @apply select-none touch-manipulation;
+  }
+}
+
+@layer utilities {
+  .tech-gradient {
+    background: linear-gradient(135deg, #0EA5E9 0%, #6366F1 100%);
+  }
+  
+  .tech-glow {
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.15);
+  }
+  
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .message-grid {
+    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+    background-size: 20px 20px;
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 640px) {
+    .message-grid {
+      background-size: 15px 15px;
+    }
+  }
+
+  /* Custom scrollbar for mobile */
+  @media (max-width: 640px) {
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      @apply bg-gray-700 rounded-full;
+    }
+  }
+}
+
+.prose pre {
+  @apply bg-gray-900 text-white rounded-lg overflow-x-auto;
+}
+
+.prose code {
+  @apply bg-gray-800 px-1 py-0.5 rounded text-gray-100 text-[0.9em];
+}
+
+.prose pre code {
+  @apply bg-transparent text-inherit p-0;
+}
+
+/* Improved mobile touch feedback */
+@media (hover: none) {
+  .hover\:bg-white\/10:hover {
+    @apply active:bg-white/5;
+  }
+}
