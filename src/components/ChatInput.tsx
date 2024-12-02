@@ -4,24 +4,23 @@ import { useTranslation } from 'react-i18next';
 import { FileUpload, UploadedFile } from './FileUpload';
 import { useThemeStore } from '../stores/theme';
 import { uploadFile, type ChatMessage } from '../api';
-
 // 定义触发词列表
 const THERAPIST_TRIGGERS = [
   // 通用心理相关触发词
-  'therapist', 'therapy', 'counselor', 'psychologist', 'psychiatrist',
-  'mental health', 'psychological', 'counseling',
-
-  // 中文触发词
-  '心理医生', '治疗师', '心理咨询', '心理健康', '心理治疗',
-  '精神科医生', '心理辅导', '心理问题',
+  '治疗师', '咨询师', '心理学家', '精神科医生', '心理健康专家', '儿童心理学家', '行为治疗师',
+  'therapist', 'counselor', 'psychologist', 'psychiatrist', 'mental health specialist', 'child psychologist', 'behavioral therapist',
 
   // 症状和关注点相关触发词
-  'anxiety', 'depression', 'stress', 'mental', 'emotional',
-  '焦虑', '抑郁', '压力', '情绪', '心理压力',
+  '焦虑', '抑郁', '情绪波动', '行为问题', '注意力问题', '多动', '情感支持', '压力管理',
+  'anxiety', 'depression', 'mood swings', 'behavior issues', 'attention problems', 'hyperactivity', 'emotional support', 'stress management',
+
+  // 需求或诊断相关触发词
+  '诊断', '心理健康支持', '治疗方案', '儿科治疗', '认知行为疗法', '情绪帮助', '咨询服务',
+  'diagnosis', 'mental health support', 'treatment options', 'pediatric therapy', 'cognitive behavioral therapy', 'help with emotions', 'counseling services',
 
   // 行动触发短语
-  'find a doctor', 'need help', 'looking for help',
-  '找医生', '需要帮助', '寻求帮助'
+  '找医生', '预约', '需要专业帮助', '寻找治疗师', '推荐专家', '给我的孩子提供支持',
+  'find a doctor', 'schedule an appointment', 'need professional help', 'looking for a therapist', 'recommend a specialist', 'support for my child'
 ];
 
 interface ChatInputProps {
