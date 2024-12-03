@@ -5,7 +5,7 @@ export default {
     send: 'Send',
     upload: 'Upload',
     typing: 'AI is analyzing...',
-    inputPlaceholder: 'Share your thoughts or feelings...',
+    inputPlaceholder: 'Tell me what you want to know...',
     dragDropText: 'Drag & drop files here or click to select',
     supportedFiles: 'Supports text, audio, and image files',
     enterToSend: 'Press Enter to send, Shift + Enter for new line',

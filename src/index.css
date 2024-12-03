@@ -83,3 +83,11 @@
     @apply active:bg-white/5;
   }
 }
+
+.bg-dark-800 {
+  background-color: #000000;
+}
+
+.bg-dark-900 {
+  background-color: #000000;
+}

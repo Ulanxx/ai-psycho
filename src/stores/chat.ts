@@ -32,14 +32,15 @@ export const useChatStore = create<ChatStore>()(
         const newChat: Chat = {
           id: uuidv4(),
           title: 'New Chat',
-          messages: [{
-            id: id,
-            role: 'assistant',
-            content: t('welcome.message'),
-            requestId: id,
-            timestamp: new Date().toISOString(),
-            files: [],
-          }],
+          // messages: [{
+          //   id: id,
+          //   role: 'assistant',
+          //   content: t('welcome.message'),
+          //   requestId: id,
+          //   timestamp: new Date().toISOString(),
+          //   files: [],
+          // }],
+          messages: [],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -116,7 +117,7 @@ export const useChatStore = create<ChatStore>()(
 
       setShowTherapists: (show: boolean) => set({ showTherapists: show }),
 
-      setSelectedTherapistIds: (ids: string[]) => 
+      setSelectedTherapistIds: (ids: string[]) =>
         set({ selectedTherapistIds: ids }),
     }),
     {

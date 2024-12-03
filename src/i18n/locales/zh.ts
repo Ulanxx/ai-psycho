@@ -5,7 +5,7 @@ export default {
     send: '发送',
     upload: '上传',
     typing: 'AI正在分析...',
-    inputPlaceholder: '分享您的想法或感受...',
+    inputPlaceholder: '告诉我你想了解什么...',
     dragDropText: '拖拽文件到此处或点击选择',
     supportedFiles: '支持文本、音频和图片文件',
     enterToSend: '按 Enter 发送，Shift + Enter 换行',

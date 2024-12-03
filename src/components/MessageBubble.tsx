@@ -44,9 +44,14 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           );
         case FileType.video:
           return (
-            <video controls className="max-w-[300px] max-h-[200px] rounded-xl">
-              <source src={file.url} type={file.type} />
-            </video>
+            <video
+              controls
+              className="max-w-[300px] max-h-[200px] rounded-xl"
+              preload="metadata"
+              controlsList="nodownload"
+              playsInline
+              src={file.url}
+            />
           );
         default:
           return (
