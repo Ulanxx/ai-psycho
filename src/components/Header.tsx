@@ -36,11 +36,11 @@ export function Header({ onMenuClick }: HeaderProps) {
           <Menu className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-lg">
-            <img src="/logo.png" alt="YOUCAI" className="w-6 h-6 rounded-lg" />
+          <div className="w-8 h-8 rounded-xl tech-gradient flex items-center justify-center shadow-lg">
+            <Bot className="w-5 h-5 text-white" />
           </div>
           <h1 className="text-lg sm:text-xl font-display font-semibold text-white hidden sm:block">
-            YOUCAI
+            AI Psychology Assistant
           </h1>
         </div>
       </div>
